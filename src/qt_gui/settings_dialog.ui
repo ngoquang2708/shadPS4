@@ -644,8 +644,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>946</width>
-         <height>586</height>
+         <width>463</width>
+         <height>246</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="inputTabVLayout" stretch="0,0">
@@ -978,6 +978,18 @@
                <property name="bottomMargin">
                 <number>0</number>
                </property>
+               <item>
+                <widget class="QGroupBox" name="ppFilterGroupBox">
+                 <property name="title">
+                  <string>Post-Processing Filter</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <widget class="QComboBox" name="ppFilterComboBox"/>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>
@@ -1193,8 +1205,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>946</width>
-         <height>586</height>
+         <width>218</width>
+         <height>173</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="pathsTabLayout" stretch="0">
@@ -1266,8 +1278,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>946</width>
-         <height>586</height>
+         <width>510</width>
+         <height>269</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="debugTabVLayout" stretch="0,1">
