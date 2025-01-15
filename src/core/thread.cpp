@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/alignment.h"
+#include "common/elf_info.h"
 #include "core/libraries/kernel/threads/pthread.h"
 #include "thread.h"
 #ifdef _WIN64
@@ -58,13 +59,25 @@ NativeThread::NativeThread() : native_handle{0} {}
 
 NativeThread::~NativeThread() {}
 
+#ifndef _WIN64
+void sleep_forever(void*) {
+    sleep(INT_MAX);
+}
+#endif
+
 int NativeThread::Create(ThreadFunc func, void* arg, const ::Libraries::Kernel::PthreadAttr* attr) {
 #ifndef _WIN64
     pthread_t* pthr = reinterpret_cast<pthread_t*>(&native_handle);
     pthread_attr_t pattr;
     pthread_attr_init(&pattr);
     pthread_attr_setstack(&pattr, attr->stackaddr_attr, attr->stacksize_attr);
-    return pthread_create(pthr, &pattr, (PthreadFunc)func, arg);
+    const auto& elf_info = Common::ElfInfo::Instance();
+    if (elf_info.Title().contains("Bloodborne") &&
+        ((Libraries::Kernel::Pthread*)arg)->name.contains("Nexus")) {
+        return pthread_create(pthr, &pattr, (PthreadFunc)sleep_forever, arg);
+    } else {
+        return pthread_create(pthr, &pattr, (PthreadFunc)func, arg);
+    }
 #else
     CLIENT_ID clientId{};
     INITIAL_TEB teb{};
