@@ -24,6 +24,8 @@ public:
     State ReadState() override;
 
 private:
+    State ReadKeyboard();
+
     SDL_Gamepad* m_gamepad = nullptr;
 
     float m_gyro_poll_rate{};

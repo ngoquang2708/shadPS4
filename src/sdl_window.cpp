@@ -147,13 +147,32 @@ State SDLInputEngine::ReadState() {
     State state{};
     state.time = Libraries::Kernel::sceKernelGetProcessTime();
 
+    if (!m_gamepad) {
+        return state;
+    }
+
     // Buttons
-    for (u8 i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; ++i) {
-        auto orbisButton = SDLGamepadToOrbisButton(i);
-        if (orbisButton == OrbisPadButtonDataOffset::None) {
+    for (u8 sdl_button = 0; sdl_button < SDL_GAMEPAD_BUTTON_COUNT; ++sdl_button) {
+        const auto orbis_button = SDLGamepadToOrbisButton(sdl_button);
+        if (orbis_button == OrbisPadButtonDataOffset::None) {
             continue;
         }
-        state.OnButton(orbisButton, SDL_GetGamepadButton(m_gamepad, (SDL_GamepadButton)i));
+        const auto is_pressed = SDL_GetGamepadButton(m_gamepad, (SDL_GamepadButton)sdl_button);
+
+        // Emulate touchpad with back button
+        if (sdl_button == SDL_GAMEPAD_BUTTON_BACK) {
+            const auto behavior = Config::getBackButtonBehavior();
+            if (behavior == "none") {
+                continue;
+            }
+            const auto x = behavior == "left" ? 0.25f : (behavior == "right" ? 0.75f : 0.5f);
+            // Trigger a touchpad event so that the touchpad emulation for back button works
+            state.OnTouchpad(0, true, x, 0.5f);
+            state.OnButton(orbis_button, is_pressed);
+            continue;
+        }
+
+        state.OnButton(orbis_button, is_pressed);
     }
 
     // Axes
