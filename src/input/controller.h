@@ -51,7 +51,7 @@ public:
     virtual void Init() = 0;
     virtual void SetLightBarRGB(u8 r, u8 g, u8 b) = 0;
     virtual void SetVibration(u8 smallMotor, u8 largeMotor) = 0;
-    virtual State ReadState() = 0;
+    virtual std::optional<State> ReadState() = 0;
     virtual float GetAccelPollRate() const = 0;
     virtual float GetGyroPollRate() const = 0;
 };

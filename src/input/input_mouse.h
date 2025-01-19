@@ -9,6 +9,7 @@
 namespace Input {
 
 void ToggleMouseEnabled();
+bool IsMouseEnabled();
 void SetMouseToJoystick(const int joystick);
 void SetMouseParams(const float mdo, const float ms, const float mso);
 

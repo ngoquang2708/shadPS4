@@ -147,7 +147,11 @@ void SDLInputEngine::SetVibration(u8 smallMotor, u8 largeMotor) {
     }
 }
 
-State SDLInputEngine::ReadState() {
+std::optional<State> SDLInputEngine::ReadState() {
+    if (IsMouseEnabled()) {
+        return std::nullopt;
+    }
+
     State state{};
     state.time = Libraries::Kernel::sceKernelGetProcessTime();
 
@@ -359,7 +363,10 @@ void WindowSDL::WaitEvent() {
     case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
     case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
     case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
-        OnGamepadEvent(&event);
+        // Disable if user use keyboard/mouse input
+        if (!Input::IsMouseEnabled()) {
+            OnGamepadEvent(&event);
+        }
         break;
     // i really would have appreciated ANY KIND OF DOCUMENTATION ON THIS
     // AND IT DOESN'T EVEN USE PROPER ENUMS

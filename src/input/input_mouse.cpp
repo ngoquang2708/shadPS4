@@ -21,6 +21,10 @@ void ToggleMouseEnabled() {
     mouse_enabled = !mouse_enabled;
 }
 
+bool IsMouseEnabled() {
+    return mouse_enabled;
+}
+
 void SetMouseToJoystick(const int joystick) {
     mouse_joystick_binding = joystick;
 }
