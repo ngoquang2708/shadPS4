@@ -143,7 +143,7 @@ void SDLInputEngine::SetVibration(u8 smallMotor, u8 largeMotor) {
     }
 }
 
-State SDLInputEngine::ReadState() {
+std::optional<State> SDLInputEngine::ReadState() {
     State state{};
     state.time = Libraries::Kernel::sceKernelGetProcessTime();
 

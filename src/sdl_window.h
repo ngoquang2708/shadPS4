@@ -21,7 +21,7 @@ public:
     void SetVibration(u8 smallMotor, u8 largeMotor) override;
     float GetGyroPollRate() const override;
     float GetAccelPollRate() const override;
-    State ReadState() override;
+    std::optional<State> ReadState() override;
 
 private:
     State ReadKeyboard();
