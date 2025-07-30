@@ -183,7 +183,6 @@ void SDLInputEngine::SetVibration(u8 smallMotor, u8 largeMotor) {
 
 State SDLInputEngine::ReadState() {
     State state{};
-    state.time = Libraries::Kernel::sceKernelGetProcessTime();
 
     // Buttons
     for (u8 i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; ++i) {
@@ -235,6 +234,8 @@ State SDLInputEngine::ReadState() {
             state.OnAccel(accel);
         }
     }
+
+    state.time = Libraries::Kernel::sceKernelGetProcessTime();
 
     return state;
 }
