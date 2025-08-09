@@ -55,6 +55,7 @@
 #include "core/libraries/system/sysmodule.h"
 #include "core/libraries/system/systemservice.h"
 #include "core/libraries/system/userservice.h"
+#include "core/libraries/system_gesture/system_gesture.h"
 #include "core/libraries/ulobjmgr/ulobjmgr.h"
 #include "core/libraries/usbd/usbd.h"
 #include "core/libraries/videodec/videodec.h"
@@ -103,6 +104,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::Random::RegisterLib(sym);
     Libraries::Usbd::RegisterLib(sym);
     Libraries::Pad::RegisterLib(sym);
+    Libraries::SystemGesture::RegisterLib(sym);
     Libraries::Ajm::RegisterLib(sym);
     Libraries::ErrorDialog::RegisterLib(sym);
     Libraries::ImeDialog::RegisterLib(sym);
@@ -130,6 +132,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::CompanionHttpd::RegisterLib(sym);
     Libraries::CompanionUtil::RegisterLib(sym);
     Libraries::Voice::RegisterLib(sym);
+    Libraries::Rtc::RegisterLib(sym);
 }
 
 } // namespace Libraries
