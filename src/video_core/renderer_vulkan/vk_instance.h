@@ -89,6 +89,11 @@ public:
         return features.depthBounds;
     }
 
+    /// Returns true if 16-bit floats are supported in shaders
+    bool IsShaderFloat16Supported() const {
+        return vk12_features.shaderFloat16;
+    }
+
     /// Returns true if 64-bit floats are supported in shaders
     bool IsShaderFloat64Supported() const {
         return features.shaderFloat64;
@@ -111,7 +116,12 @@ public:
 
     /// Returns true if VK_KHR_maintenance8 is supported
     bool IsMaintenance8Supported() const {
-        return maintenance_8 && driver_id != vk::DriverId::eMoltenvk;
+        return maintenance_8;
+    }
+
+    /// Returns true if VK_EXT_attachment_feedback_loop_layout is supported
+    bool IsAttachmentFeedbackLoopLayoutSupported() const {
+        return attachment_feedback_loop;
     }
 
     /// Returns true when VK_EXT_custom_border_color is supported
@@ -139,7 +149,7 @@ public:
         return depth_range_unrestricted;
     }
 
-    /// Returns true when the extendedDynamicState3ColorWriteMask feature of
+    /// Returns true when the extendedDynamicState3ColorWriteMask feature o
     /// VK_EXT_extended_dynamic_state3 is supported.
     bool IsDynamicColorWriteMaskSupported() const {
         return dynamic_state_3 && dynamic_state_3_features.extendedDynamicState3ColorWriteMask;
@@ -460,8 +470,8 @@ private:
     bool amd_shader_explicit_vertex_parameter{};
     bool depth_clip_control{};
     bool depth_clip_enable{};
-    bool depth_range_unrestricted{};
     bool dynamic_state_3{};
+    bool depth_range_unrestricted{};
     bool vertex_input_dynamic_state{};
     bool robustness2{};
     bool list_restart{};
@@ -475,6 +485,7 @@ private:
     bool workgroup_memory_explicit_layout{};
     bool portability_subset{};
     bool maintenance_8{};
+    bool attachment_feedback_loop{};
     bool supports_memory_budget{};
     u64 total_memory_budget{};
     std::vector<size_t> valid_heaps;

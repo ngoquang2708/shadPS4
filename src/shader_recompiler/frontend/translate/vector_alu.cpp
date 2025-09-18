@@ -331,6 +331,8 @@ void Translator::EmitVectorAlu(const GcnInst& inst) {
         return V_CMP_U64(ConditionOp::EQ, false, false, inst);
     case Opcode::V_CMP_NE_U64:
         return V_CMP_U64(ConditionOp::LG, false, false, inst);
+    case Opcode::V_CMP_GT_U64:
+        return V_CMP_U64(ConditionOp::GT, false, false, inst);
 
     case Opcode::V_CMP_CLASS_F32:
         return V_CMP_CLASS_F32(inst);
@@ -390,6 +392,8 @@ void Translator::EmitVectorAlu(const GcnInst& inst) {
         return V_CVT_PK_U8_F32(inst);
     case Opcode::V_LSHL_B64:
         return V_LSHL_B64(inst);
+    case Opcode::V_ADD_F64:
+        return V_ADD_F64(inst);
     case Opcode::V_ALIGNBIT_B32:
         return V_ALIGNBIT_B32(inst);
     case Opcode::V_ALIGNBYTE_B32:
@@ -431,6 +435,12 @@ void Translator::V_ADD_F32(const GcnInst& inst) {
     const IR::F32 src0{GetSrc<IR::F32>(inst.src[0])};
     const IR::F32 src1{GetSrc<IR::F32>(inst.src[1])};
     SetDst(inst.dst[0], ir.FPAdd(src0, src1));
+}
+
+void Translator::V_ADD_F64(const GcnInst& inst) {
+    const IR::F64 src0{GetSrc64<IR::F64>(inst.src[0])};
+    const IR::F64 src1{GetSrc64<IR::F64>(inst.src[1])};
+    SetDst64(inst.dst[0], ir.FPAdd(src0, src1));
 }
 
 void Translator::V_SUB_F32(const GcnInst& inst) {
@@ -730,14 +740,33 @@ void Translator::V_CVT_I32_F32(const GcnInst& inst) {
 
 void Translator::V_CVT_F16_F32(const GcnInst& inst) {
     const IR::F32 src0 = GetSrc<IR::F32>(inst.src[0]);
-    const IR::F16 src0fp16 = ir.FPConvert(16, src0);
-    SetDst(inst.dst[0], ir.UConvert(32, ir.BitCast<IR::U16>(src0fp16)));
+
+    IR::U32 src0fp16;
+    if (profile.support_float16) {
+        const IR::F16 converted = ir.FPConvert(16, src0);
+        src0fp16 = ir.UConvert(32, ir.BitCast<IR::U16>(converted));
+    } else {
+        const IR::U32 packed =
+            ir.Pack2x16(AmdGpu::NumberFormat::Float, ir.CompositeConstruct(src0, ir.Imm32(0.f)));
+        src0fp16 = ir.BitFieldExtract(packed, ir.Imm32(0U), ir.Imm32(16U));
+    }
+
+    SetDst(inst.dst[0], src0fp16);
 }
 
 void Translator::V_CVT_F32_F16(const GcnInst& inst) {
     const IR::U32 src0 = GetSrc(inst.src[0]);
-    const IR::U16 src0l = ir.UConvert(16, src0);
-    SetDst(inst.dst[0], ir.FPConvert(32, ir.BitCast<IR::F16>(src0l)));
+
+    IR::F32 src0l;
+    if (profile.support_float16) {
+        const IR::U16 converted = ir.UConvert(16, src0);
+        src0l = ir.FPConvert(32, ir.BitCast<IR::F16>(converted));
+    } else {
+        const IR::Value unpacked = ir.Unpack2x16(AmdGpu::NumberFormat::Float, src0);
+        src0l = IR::F32{ir.CompositeExtract(unpacked, 0)};
+    }
+
+    SetDst(inst.dst[0], src0l);
 }
 
 void Translator::V_CVT_RPI_I32_F32(const GcnInst& inst) {
@@ -1020,6 +1049,12 @@ void Translator::V_CMP_U64(ConditionOp op, bool is_signed, bool set_exec, const 
             return ir.IEqual(src0, src1);
         case ConditionOp::LG: // NE
             return ir.INotEqual(src0, src1);
+        case ConditionOp::GT:
+            if (src1.IsImmediate() && src1.U64() == 0) {
+                ASSERT(inst.src[0].field == OperandField::ScalarGPR);
+                return ir.GroupAny(ir.GetThreadBitScalarReg(IR::ScalarReg(inst.src[0].code)));
+            }
+            return ir.IGreaterThan(src0, src1, is_signed);
         default:
             UNREACHABLE_MSG("Unsupported V_CMP_U64 condition operation: {}", u32(op));
         }
