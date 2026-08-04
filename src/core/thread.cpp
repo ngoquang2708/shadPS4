@@ -3,6 +3,7 @@
 
 #include "common/alignment.h"
 #include "common/arch.h"
+#include "common/elf_info.h"
 #include "core/libraries/kernel/threads/pthread.h"
 #include "thread.h"
 #ifdef _WIN64
@@ -26,9 +27,20 @@ NativeThread::NativeThread() : native_handle{0} {}
 
 NativeThread::~NativeThread() {}
 
+#ifndef _WIN64
+void *sleep_forever(void*) {
+    for (;;)
+        sleep(INT_MAX);
+}
+#endif
+
 int NativeThread::Create(ThreadFunc func, void* arg) {
 #ifndef _WIN64
     pthread_t* pthr = reinterpret_cast<pthread_t*>(&native_handle);
+    if (Common::ElfInfo::Instance().Title().contains("Bloodborne")
+            && static_cast<Libraries::Kernel::Pthread*>(arg)->name.contains("Nexus")) {
+        func = sleep_forever;
+    }
     return pthread_create(pthr, nullptr, func, arg);
 #else
     native_handle = CreateThread(nullptr, 0, func, arg, 0, nullptr);
