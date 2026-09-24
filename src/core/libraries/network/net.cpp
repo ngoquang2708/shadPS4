@@ -1005,11 +1005,11 @@ int PS4_SYSV_ABI sceNetEpollWait(OrbisNetId epollid, OrbisNetEpollEvent* events,
     LOG_DEBUG(Lib_Net, "called, epollid = {} ({}), maxevents = {}, timeout = {}", epollid,
               epoll->name, maxevents, timeout);
 
-    int sockets_waited_on = (epoll->events.size() - epoll->async_resolutions.size()) > 0;
+    // int sockets_waited_on = (epoll->events.size() - epoll->async_resolutions.size()) > 0;
 
     std::vector<epoll_event> native_events{static_cast<size_t>(maxevents)};
     int result = ORBIS_OK;
-    if (sockets_waited_on) {
+    // if (sockets_waited_on) {
 #ifdef __linux__
         const timespec epoll_timeout{.tv_sec = timeout / 1000000,
                                      .tv_nsec = (timeout % 1000000) * 1000};
@@ -1019,7 +1019,7 @@ int PS4_SYSV_ABI sceNetEpollWait(OrbisNetId epollid, OrbisNetEpollEvent* events,
         result = epoll_wait(epoll->epoll_fd, native_events.data(), maxevents,
                             timeout < 0 ? timeout : timeout / 1000);
 #endif
-    }
+    // }
 
     int i = 0;
     if (result < 0) {
